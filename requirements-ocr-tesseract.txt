@@ -1,0 +1,10 @@
+# Optional: offline OCR backend (OCR_BACKEND=tesseract).
+# The default OCR backend is "gemini" and needs none of these.
+#
+# These also require the Tesseract engine installed on the system:
+#   Windows: https://github.com/UB-Mannheim/tesseract/wiki
+#   macOS:   brew install tesseract
+#   Debian:  apt-get install tesseract-ocr
+pytesseract==0.3.13
+pymupdf==1.25.5
+pillow==11.1.0

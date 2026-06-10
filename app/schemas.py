@@ -50,4 +50,5 @@ class AnalysisResponse(BaseModel):
     document_name: str
     domain: str
     model: str
+    extraction_method: str  # "native" | "ocr" | "native+ocr"
     result: AnalysisResult

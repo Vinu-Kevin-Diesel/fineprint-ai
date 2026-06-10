@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app.extract_text import extract_text  # noqa: E402
+from app.ingest import ingest  # noqa: E402
 from app.llm import analyze_document  # noqa: E402
 
 
@@ -17,10 +17,10 @@ def main() -> None:
     path = Path(sys.argv[1] if len(sys.argv) > 1 else "samples/sample-lease.txt")
     domain = sys.argv[2] if len(sys.argv) > 2 else "lease"
 
-    text = extract_text(path.name, path.read_bytes())
-    result, model = analyze_document(domain, text)
+    ingested = ingest(path.name, path.read_bytes())
+    result, model = analyze_document(domain, ingested.text)
 
-    print(f"\n=== {path.name}  (domain={domain}, model={model}) ===\n")
+    print(f"\n=== {path.name}  (domain={domain}, model={model}, read via={ingested.method}) ===\n")
     print("SUMMARY:\n " + result.summary + "\n")
 
     print(f"FINDINGS ({len(result.findings)}):")

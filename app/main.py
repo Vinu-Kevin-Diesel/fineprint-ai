@@ -6,8 +6,10 @@ from fastapi.responses import HTMLResponse
 from . import __version__
 from .config import get_settings
 from .domains import list_domains
-from .extract_text import UnsupportedFileType, extract_text
+from .extract_text import UnsupportedFileType
+from .ingest import ingest
 from .llm import analyze_document
+from .ocr import OcrUnavailable
 from .schemas import AnalysisResponse
 
 app = FastAPI(
@@ -48,15 +50,22 @@ async def analyze(
         raise HTTPException(status_code=413, detail=f"File exceeds {s.max_upload_mb} MB limit.")
 
     try:
-        text = extract_text(file.filename or "upload", data)
+        ingested = ingest(file.filename or "upload", data)
     except UnsupportedFileType as e:
         raise HTTPException(status_code=415, detail=str(e))
+    except OcrUnavailable as e:
+        raise HTTPException(status_code=501, detail=str(e))
+    except Exception as e:  # OCR/provider failure during extraction
+        raise HTTPException(status_code=502, detail=f"Text extraction failed: {e}")
 
-    if not text.strip():
-        raise HTTPException(status_code=422, detail="Could not extract any text from the document.")
+    if not ingested.text.strip():
+        raise HTTPException(
+            status_code=422,
+            detail="Could not extract any text from the document (even with OCR).",
+        )
 
     try:
-        result, model = analyze_document(domain, text)
+        result, model = analyze_document(domain, ingested.text)
     except Exception as e:  # surface provider errors cleanly to the client
         raise HTTPException(status_code=502, detail=f"Analysis failed: {e}")
 
@@ -64,6 +73,7 @@ async def analyze(
         document_name=file.filename or "upload",
         domain=domain,
         model=model,
+        extraction_method=ingested.method,
         result=result,
     )
 
@@ -92,8 +102,8 @@ def index() -> str:
   <form id="f">
     <label>Document type</label>
     <select name="domain">{options}</select>
-    <label>File (PDF, DOCX, or TXT)</label>
-    <input type="file" name="file" accept=".pdf,.docx,.txt,.md" required>
+    <label>File (PDF, DOCX, TXT, or a scanned image)</label>
+    <input type="file" name="file" accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.tif,.tiff,.bmp,.webp" required>
     <button type="submit">Analyze</button>
   </form>
   <div id="out"></div>
@@ -106,7 +116,8 @@ f.addEventListener('submit', async (e) => {{
   if (!res.ok) {{ out.textContent = 'Error: ' + (await res.text()); return; }}
   const data = await res.json();
   const r = data.result;
-  let html = '<h2>Summary</h2><p>' + r.summary + '</p><h2>Findings (' + r.findings.length + ')</h2>';
+  let html = '<p class="badge">read via: ' + data.extraction_method + ' · ' + data.model + '</p>';
+  html += '<h2>Summary</h2><p>' + r.summary + '</p><h2>Findings (' + r.findings.length + ')</h2>';
   for (const fd of r.findings) {{
     html += '<div class="finding ' + fd.severity + '">' +
       '<span class="badge">' + fd.severity + ' · ' + fd.type + '</span>' +
