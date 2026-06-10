@@ -1,0 +1,16 @@
+name: Insurance Policy
+description: A policy covering health, auto, home, renters, or similar risks.
+watch_for:
+  - Exclusions that quietly remove coverage you'd expect to have
+  - High or hidden deductibles, co-pays, or out-of-pocket maximums
+  - Coverage caps or sub-limits well below the headline coverage amount
+  - Conditions that void coverage (late payment, non-disclosure, "reasonable care")
+  - Claims deadlines and notice requirements that are easy to miss
+  - Premium that can be raised or policy cancelled at the insurer's discretion
+  - A clause requiring arbitration or waiving your right to sue
+  - Definitions narrowed so common events don't qualify (e.g. "flood" vs "water damage")
+typical_terms:
+  - Coverage limits, deductibles, and exclusions are clearly listed
+  - A defined claims process with reasonable notice windows
+  - Renewal and cancellation terms stated for both insurer and insured
+  - Premium fixed for the policy term

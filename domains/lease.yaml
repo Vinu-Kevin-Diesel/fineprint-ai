@@ -1,0 +1,18 @@
+name: Residential Lease / Rental Agreement
+description: A contract to rent a house or apartment.
+watch_for:
+  - Security deposit that exceeds local norms or has vague return conditions
+  - Automatic renewal or auto-conversion to month-to-month at a higher rate
+  - Tenant pays for repairs/maintenance that are normally the landlord's responsibility
+  - Early-termination penalties that are disproportionate (e.g. full remaining rent)
+  - Landlord right to enter with little or no notice
+  - Joint-and-several liability making one roommate liable for all rent
+  - Waiver of the right to sue, to a jury, or to withhold rent for needed repairs
+  - Fees stacked on top of rent (admin, "convenience", late fees with no grace period)
+  - Tenant responsible for landlord's legal fees regardless of who wins
+typical_terms:
+  - Security deposit of one to two months' rent, returned within a stated period
+  - Landlord must give 24-48 hours notice before entering
+  - Late fee applies only after a short grace period
+  - Landlord handles structural and major-systems repairs
+  - Either party may terminate with proper written notice

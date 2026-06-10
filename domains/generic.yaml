@@ -1,0 +1,14 @@
+name: Generic Policy / Contract
+description: Any policy, contract, or terms-of-service document.
+watch_for:
+  - Clauses that contradict each other
+  - Fees or charges that are easy to overlook
+  - Terms that renew or charge automatically unless you opt out
+  - One-sided terms that heavily favor the other party
+  - Rights or protections you give up by signing
+  - Vague or ambiguous wording that could be interpreted against you
+  - Important situations the document fails to address
+typical_terms:
+  - Both parties have defined obligations and remedies
+  - Termination conditions are stated for both sides
+  - Fees are disclosed clearly and up front
