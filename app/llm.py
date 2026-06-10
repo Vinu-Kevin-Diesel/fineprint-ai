@@ -9,7 +9,7 @@ from google.genai import types
 
 from .config import get_settings
 from .domains import get_domain
-from .genai_client import get_client
+from .genai_client import generate_with_retry
 from .schemas import AnalysisResult
 
 
@@ -48,10 +48,9 @@ Return ONLY the structured JSON matching the provided schema.
 def analyze_document(domain_name: str, document_text: str) -> tuple[AnalysisResult, str]:
     """Run extraction + red-flag analysis. Returns (result, model_name)."""
     s = get_settings()
-    client = get_client()
     prompt = _build_prompt(domain_name, document_text)
 
-    response = client.models.generate_content(
+    response = generate_with_retry(
         model=s.gemini_model,
         contents=prompt,
         config=types.GenerateContentConfig(

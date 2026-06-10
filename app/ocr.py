@@ -13,7 +13,7 @@ import io
 from google.genai import types
 
 from .config import get_settings
-from .genai_client import get_client
+from .genai_client import generate_with_retry
 
 # Image extensions we accept, mapped to their MIME type.
 IMAGE_MIME = {
@@ -52,8 +52,7 @@ def ocr_bytes(data: bytes, mime_type: str) -> str:
 
 def _gemini_ocr(data: bytes, mime_type: str) -> str:
     s = get_settings()
-    client = get_client()
-    response = client.models.generate_content(
+    response = generate_with_retry(
         model=s.gemini_model,
         contents=[types.Part.from_bytes(data=data, mime_type=mime_type), _OCR_PROMPT],
         config=types.GenerateContentConfig(temperature=0.0),
