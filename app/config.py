@@ -21,6 +21,17 @@ class Settings(BaseSettings):
     max_upload_mb: int = 15
     default_domain: str = "generic"
 
+    # --- OCR (for scanned PDFs and image documents) ---
+    # gemini  : multimodal OCR via the configured Gemini/Vertex model (no extra deps)
+    # tesseract: offline OCR (needs `pip install -r requirements-ocr-tesseract.txt` + the tesseract binary)
+    # none    : disable OCR; scanned docs return an error
+    ocr_backend: str = "gemini"
+    # If a PDF's native text layer yields fewer than this many characters, treat it as scanned.
+    ocr_min_chars: int = 50
+    # Tesseract-only knobs:
+    tesseract_cmd: str | None = None  # path to tesseract.exe if not on PATH
+    ocr_dpi: int = 200
+
     @property
     def is_llm_configured(self) -> bool:
         if self.use_vertex:

@@ -11,14 +11,28 @@ every time.
 ## How it works
 
 ```
-Upload (PDF/DOCX/TXT)
+Upload (PDF/DOCX/TXT/image)
    │
    ▼  FastAPI (Cloud Run)
-text extraction ──► Gemini (clause extraction + red-flag analysis)
-   │                        guided by a swappable per-document "domain pack"
+ingest ── native text layer? ──► use it
+   │  └─ scanned / image ──► OCR (Gemini multimodal, or Tesseract)
+   ▼
+Gemini (clause extraction + red-flag analysis)
+   │        guided by a swappable per-document "domain pack"
    ▼
 structured findings  ──►  JSON API  +  simple web UI
 ```
+
+### Text extraction & OCR
+
+Ingestion tries the **native text layer first** (fast, free) and falls back to **OCR**
+for scanned PDFs and image uploads (`.png/.jpg/.tiff/...`). The response reports which
+path was used via `extraction_method` (`native` | `ocr` | `native+ocr`). OCR backends:
+
+- **`gemini`** (default) — multimodal OCR through the same Gemini/Vertex model. No extra
+  dependencies; works locally and on GCP unchanged.
+- **`tesseract`** (optional, offline) — `pip install -r requirements-ocr-tesseract.txt`
+  plus the system Tesseract binary, then set `OCR_BACKEND=tesseract`.
 
 - **Domain-agnostic engine, swappable domain packs.** The analysis engine never changes;
   each document type (`domains/lease.yaml`, `domains/insurance.yaml`, …) supplies the

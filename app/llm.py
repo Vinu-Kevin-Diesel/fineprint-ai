@@ -5,24 +5,12 @@ selected by config. The same structured-output contract (AnalysisResult) is used
 for both so nothing downstream changes.
 """
 
-from functools import lru_cache
-
-from google import genai
 from google.genai import types
 
 from .config import get_settings
 from .domains import get_domain
+from .genai_client import get_client
 from .schemas import AnalysisResult
-
-
-@lru_cache
-def _client() -> genai.Client:
-    s = get_settings()
-    if s.use_vertex:
-        return genai.Client(
-            vertexai=True, project=s.gcp_project, location=s.gcp_location
-        )
-    return genai.Client(api_key=s.gemini_api_key)
 
 
 def _build_prompt(domain_name: str, document_text: str) -> str:
@@ -60,7 +48,7 @@ Return ONLY the structured JSON matching the provided schema.
 def analyze_document(domain_name: str, document_text: str) -> tuple[AnalysisResult, str]:
     """Run extraction + red-flag analysis. Returns (result, model_name)."""
     s = get_settings()
-    client = _client()
+    client = get_client()
     prompt = _build_prompt(domain_name, document_text)
 
     response = client.models.generate_content(
