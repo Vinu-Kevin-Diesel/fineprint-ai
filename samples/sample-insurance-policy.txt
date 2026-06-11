@@ -1,0 +1,27 @@
+ACME HEALTH PLAN — ELIGIBILITY AND BENEFITS (SAMPLE)
+
+SECTION 1. SENIOR PLAN ELIGIBILITY
+1.1 Any applicant who is 65 years of age or older is eligible for the Senior Plan.
+1.2 Applicants who are 65 years of age or older are not eligible for the Senior Plan
+    and must instead enroll in the Standard Plan.
+
+SECTION 2. LOYALTY DISCOUNT
+2.1 To qualify for the Loyalty Discount, a member must have been continuously enrolled
+    for at least 24 months.
+2.2 The Loyalty Discount is available only to members who have been enrolled for fewer
+    than 12 months.
+
+SECTION 3. PREMIUM TIER
+3.1 Members qualify for the Premium Tier only if their annual contribution is at least
+    $5,000.
+3.2 Members whose annual contribution is below $3,000 are automatically placed in the
+    Premium Tier.
+
+SECTION 4. WAITING PERIOD
+4.1 Coverage for elective procedures begins after a waiting period of 90 days from
+    enrollment.
+4.2 Members may claim elective procedures starting 30 days after enrollment.
+
+SECTION 5. GENERAL TERMS
+5.1 The minimum enrollment age for any plan is 18 years.
+5.2 Members aged 70 or older receive a complimentary annual wellness visit.

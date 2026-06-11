@@ -9,8 +9,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from app.extract_rules import extract_ruleset  # noqa: E402
 from app.ingest import ingest  # noqa: E402
 from app.llm import analyze_document  # noqa: E402
+from app.verify import check_consistency  # noqa: E402
 
 
 def main() -> None:
@@ -32,6 +34,19 @@ def main() -> None:
     print(f"\nCLAUSES EXTRACTED: {len(result.clauses)}")
     for c in result.clauses:
         print(f"  - {c.id} [{c.category}] {c.heading}")
+
+    # Mode A: formal consistency check (Z3).
+    report = check_consistency(extract_ruleset(ingested.text))
+    print(f"\n=== FORMAL CONSISTENCY (Z3) — {report.variables} vars, {report.rules} rules ===")
+    print(f"consistent: {report.consistent}")
+    print(f"\nCONTRADICTIONS ({len(report.contradictions)}):")
+    for c in report.contradictions:
+        print(f"  - {c.rule_ids}: {c.explanation}")
+    print(f"\nUNREACHABLE CLAUSES ({len(report.unreachable)}):")
+    for u in report.unreachable:
+        print(f"  - [{u.rule_id}] {u.explanation}")
+    if report.notes:
+        print(f"\nnotes: {report.notes}")
 
 
 if __name__ == "__main__":

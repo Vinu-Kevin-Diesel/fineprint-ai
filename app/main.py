@@ -4,13 +4,19 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse
 
 from . import __version__
+import logging
+
 from .config import get_settings
 from .domains import list_domains
+from .extract_rules import extract_ruleset
 from .extract_text import UnsupportedFileType
 from .ingest import ingest
 from .llm import analyze_document
 from .ocr import OcrUnavailable
 from .schemas import AnalysisResponse
+from .verify import check_consistency
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="FinePrint",
@@ -37,6 +43,7 @@ def health() -> dict:
 async def analyze(
     file: UploadFile = File(...),
     domain: str = Form("generic"),
+    verify_consistency: bool = Form(True),
 ) -> AnalysisResponse:
     s = get_settings()
     if not s.is_llm_configured:
@@ -69,12 +76,22 @@ async def analyze(
     except Exception as e:  # surface provider errors cleanly to the client
         raise HTTPException(status_code=502, detail=f"Analysis failed: {e}")
 
+    # Mode A: formal consistency check (extract rules -> prove with Z3).
+    # Best-effort: a verification failure shouldn't sink the whole analysis.
+    consistency = None
+    if verify_consistency:
+        try:
+            consistency = check_consistency(extract_ruleset(ingested.text))
+        except Exception as e:
+            logger.warning("Consistency check failed: %s", e)
+
     return AnalysisResponse(
         document_name=file.filename or "upload",
         domain=domain,
         model=model,
         extraction_method=ingested.method,
         result=result,
+        consistency=consistency,
     )
 
 
@@ -124,6 +141,20 @@ f.addEventListener('submit', async (e) => {{
       '<strong> ' + fd.title + '</strong><br>' + fd.explanation +
       '<br><em>What to do:</em> ' + fd.recommendation + '</div>';
   }}
+  const cons = data.consistency;
+  if (cons && cons.checked) {
+    html += '<h2>Formal consistency (Z3)</h2>';
+    html += '<p class="badge">' + cons.variables + ' variables · ' + cons.rules + ' rules · '
+      + (cons.consistent ? 'no contradictions proven' : (cons.contradictions.length + ' contradiction(s) proven')) + '</p>';
+    for (const c of cons.contradictions) {
+      html += '<div class="finding high"><span class="badge">contradiction · ' + c.rule_ids.join(', ')
+        + '</span><br>' + c.explanation + '</div>';
+    }
+    for (const u of cons.unreachable) {
+      html += '<div class="finding"><span class="badge">unreachable · ' + u.rule_id
+        + '</span><br>' + u.explanation + '</div>';
+    }
+  }
   html += '<h2>Clauses extracted (' + r.clauses.length + ')</h2>';
   out.innerHTML = html;
 }});

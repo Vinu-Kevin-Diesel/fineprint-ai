@@ -8,3 +8,4 @@ google-genai==1.9.0
 pypdf==5.1.0
 python-docx==1.1.2
 pyyaml==6.0.2
+z3-solver==4.13.4.0

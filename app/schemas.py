@@ -4,6 +4,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
+from .formal_schemas import ConsistencyReport
+
 
 class Severity(str, Enum):
     low = "low"
@@ -52,3 +54,4 @@ class AnalysisResponse(BaseModel):
     model: str
     extraction_method: str  # "native" | "ocr" | "native+ocr"
     result: AnalysisResult
+    consistency: ConsistencyReport | None = None  # Z3 formal verification (Mode A)

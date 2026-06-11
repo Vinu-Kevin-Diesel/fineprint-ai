@@ -17,10 +17,10 @@ Upload (PDF/DOCX/TXT/image)
 ingest ── native text layer? ──► use it
    │  └─ scanned / image ──► OCR (Gemini multimodal, or Tesseract)
    ▼
-Gemini (clause extraction + red-flag analysis)
-   │        guided by a swappable per-document "domain pack"
+   ├─► Mode B: Gemini red-flag analysis (guided by a domain pack)
+   └─► Mode A: Gemini rule extraction ──► Z3 SMT solver (prove contradictions)
    ▼
-structured findings  ──►  JSON API  +  simple web UI
+structured findings + consistency report  ──►  JSON API  +  simple web UI
 ```
 
 ### Text extraction & OCR
@@ -39,10 +39,35 @@ path was used via `extraction_method` (`native` | `ocr` | `native+ocr`). OCR bac
   baseline of *what's typical* and *what to watch for*. Add a new document type by dropping
   in a YAML file.
 - **Two detection modes:**
-  - *Red-flag detection* (live now): one-sided terms, hidden fees, auto-renewals, unusual
-    terms vs. the norm, waived rights, gaps.
-  - *Formal consistency checking* (planned, M4): compile extracted rules to logic and use an
-    SMT solver to **prove** contradictions / unreachable clauses.
+  - **Mode B — Red-flag detection** (LLM): one-sided terms, hidden fees, auto-renewals,
+    unusual terms vs. the norm, waived rights, gaps.
+  - **Mode A — Formal consistency checking** (LLM + Z3 SMT solver): the LLM translates
+    prose into typed variables and logical rules; **Z3 then *proves*** contradictions and
+    unreachable clauses. The model never decides what conflicts — the solver does.
+
+### Formal verification (Mode A)
+
+The split is the whole point: the LLM does prose→structure (which it's good at); the SMT
+solver does the logic (which the LLM is bad at), so every consistency claim is a theorem,
+not a guess.
+
+- **Rule extraction** ([app/extract_rules.py](app/extract_rules.py)) → a `RuleSet` of typed
+  variables (`age_years: int`, `deposit_refundable: bool`, `plan: enum`) and rules as
+  facts or `condition → consequence` implications.
+- **Z3 verifier** ([app/verify.py](app/verify.py)) proves:
+  - **Contradictions** (pairwise): two clauses whose conditions can co-occur but whose
+    consequences are then jointly unsatisfiable — e.g. "65+ is eligible" vs. "65+ is not
+    eligible", or a deposit that's both refundable and non-refundable.
+  - **Unreachable clauses**: a condition that's impossible given the policy's fixed terms —
+    dead logic that can never apply.
+- **Tested** independently of the LLM: [tests/test_verify.py](tests/test_verify.py) pins the
+  solver's verdicts on hand-built rule sets (`pytest`).
+- *Documented limitation:* contradiction detection is pairwise, so a conflict that only
+  emerges from 3+ clauses jointly is not reported.
+
+Try it: `python scripts/run_local.py samples/sample-insurance-policy.txt insurance` — the
+sample has four planted contradictions (senior eligibility, loyalty discount, premium tier,
+waiting period) that Z3 proves.
 
 ## Run locally (no GCP needed)
 
@@ -81,6 +106,8 @@ Vertex AI — no API key in the environment.
 ## Roadmap
 
 - **M1 (done):** upload → extract → Gemini red-flag analysis + web UI.
-- **M2:** LangGraph multi-agent pipeline; persist clauses + source spans in pgvector.
-- **M3:** Pub/Sub → BigQuery findings stream; Looker/React dashboard.
-- **M4:** Z3 SMT consistency engine — *prove* contradictions and unreachable clauses.
+- **OCR (done):** native-first ingestion with OCR fallback for scanned PDFs/images.
+- **M4 — formal verification (done):** Z3 SMT consistency engine — *proves* contradictions
+  and unreachable clauses, with a unit-tested solver.
+- **Next:** eval harness (precision/recall on labeled contracts); grounding/source-span
+  verification; async job model + persistence; Cloud Run + Vertex AI deploy.
