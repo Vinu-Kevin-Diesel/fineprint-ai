@@ -55,6 +55,20 @@ class AnalysisResult(BaseModel):
     findings: list[Finding]
 
 
+# --- intermediate structured-output contracts for the map-reduce pipeline ---
+
+class ClauseList(BaseModel):
+    clauses: list[Clause]
+
+
+class FindingList(BaseModel):
+    findings: list[Finding]
+
+
+class DocSummary(BaseModel):
+    summary: str = Field(description="2-3 sentence plain-English read on the document overall.")
+
+
 class AnalysisResponse(BaseModel):
     """What the API returns to the client."""
     document_name: str
