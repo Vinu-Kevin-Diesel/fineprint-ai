@@ -142,19 +142,19 @@ f.addEventListener('submit', async (e) => {{
       '<br><em>What to do:</em> ' + fd.recommendation + '</div>';
   }}
   const cons = data.consistency;
-  if (cons && cons.checked) {
+  if (cons && cons.checked) {{
     html += '<h2>Formal consistency (Z3)</h2>';
     html += '<p class="badge">' + cons.variables + ' variables · ' + cons.rules + ' rules · '
       + (cons.consistent ? 'no contradictions proven' : (cons.contradictions.length + ' contradiction(s) proven')) + '</p>';
-    for (const c of cons.contradictions) {
+    for (const c of cons.contradictions) {{
       html += '<div class="finding high"><span class="badge">contradiction · ' + c.rule_ids.join(', ')
         + '</span><br>' + c.explanation + '</div>';
-    }
-    for (const u of cons.unreachable) {
+    }}
+    for (const u of cons.unreachable) {{
       html += '<div class="finding"><span class="badge">unreachable · ' + u.rule_id
         + '</span><br>' + u.explanation + '</div>';
-    }
-  }
+    }}
+  }}
   html += '<h2>Clauses extracted (' + r.clauses.length + ')</h2>';
   out.innerHTML = html;
 }});
