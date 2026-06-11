@@ -34,11 +34,19 @@ class Clause(BaseModel):
 
 class Finding(BaseModel):
     clause_ids: list[str] = Field(description="Clause id(s) this finding refers to.")
+    location: str = Field(
+        description="Where in the document this is, e.g. a section/clause number like '§5.1(b)' or 'Section 7'. Use '' only if truly unlabeled."
+    )
+    source_quote: str = Field(
+        description="A short VERBATIM quote (max ~25 words) from the document that supports this finding. Must be copied exactly, not paraphrased."
+    )
     type: FindingType
     severity: Severity
-    title: str = Field(description="One-line summary of what's off.")
-    explanation: str = Field(description="Plain-English why-this-matters, addressed to the person signing.")
-    recommendation: str = Field(description="What the reader should do or ask about.")
+    title: str = Field(description="Specific one-line summary naming the actual term (e.g. 'Deposit interest forfeited for first 5 years'), not a generic label.")
+    explanation: str = Field(
+        description="Why this matters to the person signing, citing the concrete detail (exact amount, deadline, %, who bears it). No generic 'review carefully' filler."
+    )
+    recommendation: str = Field(description="A specific action or question to raise about THIS clause.")
 
 
 class AnalysisResult(BaseModel):

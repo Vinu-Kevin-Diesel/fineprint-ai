@@ -14,6 +14,7 @@ from .config import get_settings
 from .extract_text import (
     UnsupportedFileType,
     docx_to_text,
+    looks_garbled,
     pdf_to_text,
     plain_to_text,
 )
@@ -35,9 +36,11 @@ def ingest(filename: str, data: bytes) -> Ingested:
 
     if ext == ".pdf":
         native = pdf_to_text(data)
-        if len(native) >= get_settings().ocr_min_chars:
+        # Use native text only if there's enough of it AND it isn't mis-decoded glyphs
+        # (some PDFs use custom fonts that pypdf turns into symbol junk).
+        if len(native) >= get_settings().ocr_min_chars and not looks_garbled(native):
             return Ingested(native, "native")
-        # Little or no text layer -> treat as scanned and OCR the whole PDF.
+        # Empty, too short, or garbled text layer -> OCR the whole PDF.
         ocr_text = ocr_bytes(data, "application/pdf")
         method = "native+ocr" if native else "ocr"
         # Prefer OCR text; keep whatever native text existed only if OCR came back empty.

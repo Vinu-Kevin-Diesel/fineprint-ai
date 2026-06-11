@@ -31,9 +31,18 @@ Your tasks:
 1. Extract the document's substantive clauses. Restate each in plain language and keep a short verbatim source excerpt.
 2. Flag anything that looks off: internal contradictions, one-sided terms, hidden fees, \
 auto-renewals, unusual terms vs. what's typical, rights the reader waives, coverage gaps, or ambiguous wording.
-   - Address explanations directly to the reader ("you").
-   - Be concrete and practical. Do not invent clauses that aren't in the text.
-   - If the document looks fair, it is fine to return few or no findings.
+
+EVERY finding MUST be SPECIFIC and TRACEABLE — generic findings are useless:
+- location: cite the exact section/clause number it comes from (e.g. "§5.1(b)", "Section 7"). If the document is unlabeled, give the heading.
+- source_quote: copy a SHORT VERBATIM phrase from the document (exact words, not paraphrased) that proves the finding.
+- title: name the actual term. GOOD: "Tenant forfeits deposit interest for first 5 years". BAD: "Security Deposit Deductions".
+- explanation: cite the concrete detail — the exact dollar amount, %, number of days, deadline, or who bears the cost. NEVER write filler like "review carefully" or "be aware".
+- recommendation: a concrete question or action about THIS specific clause.
+
+Rules:
+- Address explanations directly to the reader ("you").
+- Do NOT invent clauses, numbers, or quotes that aren't in the text. If a detail (like a dollar amount) is blank in the document, say so rather than guessing.
+- Prefer fewer, sharper findings over many vague ones. If the document genuinely looks fair, return few or no findings.
 
 Return ONLY the structured JSON matching the provided schema.
 

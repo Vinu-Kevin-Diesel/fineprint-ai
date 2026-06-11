@@ -28,3 +28,19 @@ def docx_to_text(data: bytes) -> str:
 
 def plain_to_text(data: bytes) -> str:
     return data.decode("utf-8", errors="replace").strip()
+
+
+def looks_garbled(text: str, threshold: float = 0.55) -> bool:
+    """True if the text looks like mis-decoded PDF glyphs rather than real prose.
+
+    Some PDFs use custom/ligature font encodings, so pypdf returns symbol/private-use
+    junk (e.g. '✁✂✄ ❆✠✴☎✂✂') instead of letters. Such text can still be long enough to
+    pass a length check, so we also gate on the share of normal alphanumeric content:
+    real prose is mostly letters/digits/spaces; garbled text is mostly symbols.
+    """
+    sample = text[:4000]
+    nonspace = [c for c in sample if not c.isspace()]
+    if not nonspace:
+        return True
+    meaningful = sum(1 for c in nonspace if c.isalnum() or c in ".,;:!?()'\"$%/-&")
+    return (meaningful / len(nonspace)) < threshold

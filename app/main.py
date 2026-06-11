@@ -113,6 +113,7 @@ def index() -> str:
   .finding {{ border-left: 4px solid #e8a01a; background: #fff8ec; padding: 10px 14px; margin: 10px 0; border-radius: 6px; }}
   .high {{ border-color: #d93025; background: #fce8e6; }}
   .badge {{ font-size: 12px; text-transform: uppercase; color: #666; }}
+  .quote {{ font-style: italic; color: #444; border-left: 2px solid #ccc; padding-left: 8px; display: inline-block; margin: 4px 0; }}
 </style></head>
 <body>
   <h1>FinePrint</h1>
@@ -135,16 +136,19 @@ f.addEventListener('submit', async (e) => {{
   const data = await res.json();
   const r = data.result;
   let html = '<p class="badge">read via: ' + data.extraction_method + ' · ' + data.model + '</p>';
-  html += '<h2>Summary</h2><p>' + r.summary + '</p><h2>Findings (' + r.findings.length + ')</h2>';
+  html += '<h2>Summary</h2><p>' + r.summary + '</p>';
+  html += '<h2>Flagged by AI review (' + r.findings.length + ')</h2>';
   for (const fd of r.findings) {{
+    const loc = fd.location ? ('<span class="badge"> · ' + fd.location + '</span>') : '';
+    const quote = fd.source_quote ? ('<br><span class="quote">“' + fd.source_quote + '”</span>') : '';
     html += '<div class="finding ' + fd.severity + '">' +
-      '<span class="badge">' + fd.severity + ' · ' + fd.type + '</span>' +
-      '<strong> ' + fd.title + '</strong><br>' + fd.explanation +
+      '<span class="badge">' + fd.severity + ' · ' + fd.type + '</span>' + loc +
+      '<strong> ' + fd.title + '</strong>' + quote + '<br>' + fd.explanation +
       '<br><em>What to do:</em> ' + fd.recommendation + '</div>';
   }}
   const cons = data.consistency;
   if (cons && cons.checked) {{
-    html += '<h2>Formal consistency (Z3)</h2>';
+    html += '<h2>Proven by SMT solver (Z3)</h2>';
     html += '<p class="badge">' + cons.variables + ' variables · ' + cons.rules + ' rules · '
       + (cons.consistent ? 'no contradictions proven' : (cons.contradictions.length + ' contradiction(s) proven')) + '</p>';
     for (const c of cons.contradictions) {{

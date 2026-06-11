@@ -25,9 +25,12 @@ def main() -> None:
     print(f"\n=== {path.name}  (domain={domain}, model={model}, read via={ingested.method}) ===\n")
     print("SUMMARY:\n " + result.summary + "\n")
 
-    print(f"FINDINGS ({len(result.findings)}):")
+    print(f"FLAGGED BY AI REVIEW ({len(result.findings)}):")
     for i, f in enumerate(result.findings, 1):
-        print(f"\n  [{i}] ({f.severity.value.upper()} · {f.type.value})  {f.title}")
+        loc = f" @ {f.location}" if f.location else ""
+        print(f"\n  [{i}] ({f.severity.value.upper()} · {f.type.value}){loc}  {f.title}")
+        if f.source_quote:
+            print(f"      quote: “{f.source_quote}”")
         print(f"      why: {f.explanation}")
         print(f"      do:  {f.recommendation}")
 
