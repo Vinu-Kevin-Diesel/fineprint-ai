@@ -7,10 +7,7 @@ same unit) is what makes the downstream solving meaningful, so the prompt
 pushes hard on that.
 """
 
-from google.genai import types
-
-from .config import get_settings
-from .genai_client import generate_with_retry
+from .llm_provider import generate_structured
 from .formal_schemas import RuleSet
 
 _EXTRACTION_PROMPT = """You translate policy/contract text into a FORMAL rule set for a logic solver.
@@ -55,14 +52,5 @@ Return ONLY the structured JSON.
 
 
 def extract_ruleset(document_text: str) -> RuleSet:
-    s = get_settings()
-    response = generate_with_retry(
-        model=s.gemini_model,
-        contents=_EXTRACTION_PROMPT.replace("{document_text}", document_text),
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=RuleSet,
-            temperature=0.0,
-        ),
-    )
-    return response.parsed
+    prompt = _EXTRACTION_PROMPT.replace("{document_text}", document_text)
+    return generate_structured(prompt=prompt, schema=RuleSet, temperature=0.0)

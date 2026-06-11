@@ -23,6 +23,22 @@ ingest ── native text layer? ──► use it
 structured findings + consistency report  ──►  JSON API  +  simple web UI
 ```
 
+### Pluggable reasoning provider
+
+The clause analysis and rule extraction go through a provider-agnostic layer
+([app/llm_provider.py](app/llm_provider.py)), selected by `LLM_PROVIDER`:
+
+- **`gemini`** (default) — Google Gemini / Vertex, using native structured output.
+- **`openai_compatible`** — any OpenAI-compatible endpoint via one client + `LLM_BASE_URL`:
+  **NVIDIA NIM** (`https://integrate.api.nvidia.com/v1`), **Groq**, **self-hosted vLLM**
+  (`http://localhost:8000/v1`), or OpenAI. Structured output is done with JSON mode + the
+  schema in the prompt + **Pydantic validation, re-asking the model on invalid JSON**, plus
+  transient-error retry and (for Gemini) model failover.
+
+Swapping providers is config-only — no code changes. OCR is intentionally separate (it needs
+a vision-capable model), so you can run reasoning on a text LLM (NIM/vLLM) while OCR stays on
+Gemini or Tesseract.
+
 ### Text extraction & OCR
 
 Ingestion tries the **native text layer first** (fast, free) and falls back to **OCR**

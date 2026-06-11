@@ -33,8 +33,9 @@ def health() -> dict:
         "status": "ok",
         "version": __version__,
         "llm_configured": s.is_llm_configured,
-        "provider": "vertex" if s.use_vertex else "gemini-api",
-        "model": s.gemini_model,
+        "provider": s.llm_provider,
+        "model": s.active_model(),
+        "ocr_backend": s.ocr_backend,
         "domains": list_domains(),
     }
 
