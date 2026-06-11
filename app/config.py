@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     # Local dev: a Gemini API key. Production: USE_VERTEX=true (uses GCP credentials).
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-2.5-flash"
+    # Comma-separated models to fail over to when the primary stays overloaded (503).
+    gemini_fallback_models: str = "gemini-2.0-flash,gemini-2.5-flash-lite"
 
     use_vertex: bool = False
     gcp_project: str | None = None
@@ -31,6 +33,15 @@ class Settings(BaseSettings):
     # Tesseract-only knobs:
     tesseract_cmd: str | None = None  # path to tesseract.exe if not on PATH
     ocr_dpi: int = 200
+
+    def model_chain(self) -> list[str]:
+        """Primary model first, then de-duplicated fallbacks."""
+        chain = [self.gemini_model]
+        for m in self.gemini_fallback_models.split(","):
+            m = m.strip()
+            if m and m not in chain:
+                chain.append(m)
+        return chain
 
     @property
     def is_llm_configured(self) -> bool:
